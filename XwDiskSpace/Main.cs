@@ -13,11 +13,14 @@ namespace XwDiskSpace
         private ImageList imageList = new ImageList();
         private Dictionary<string, long> FolderSizes = new Dictionary<string, long>();
         private Stopwatch runTime = new Stopwatch();
-        
+        long totalFilesSoFar = 0;
+        long totalFoldersSoFar = 0;
+        long totalSpaceSoFar = 0;
+
         //*************************************************************************************************************
         public Main()
         {
-            //            imageList.Images.Add(global::XwNoNagle.Properties.Resources.nic);   //0
+            //imageList.Images.Add(global::XwNoNagle.Properties.Resources.nic);   //0
 
             InitializeComponent();
 
@@ -30,15 +33,14 @@ namespace XwDiskSpace
         private void Main_Load(object sender, EventArgs e)
         {
 #if DEBUG
-            textStartPath.Text = @"C:\data";
+            textStartPath.Text = @"C:\data"; 
+            textStartPath.Text = @"\\storage\users\Max";
 #endif
 
             listViewResult.SmallImageList = imageList;
             listViewResult.FullRowSelect = true;
-            listViewResult.Columns.Add("name");
-            listViewResult.Columns.Add("zone");
-            listViewResult.Columns.Add("type");
-            listViewResult.Columns.Add("value");
+            listViewResult.Columns.Add("Path");
+            listViewResult.Columns.Add("size");
             Main_Resize(sender, e);
         }
 
@@ -48,10 +50,8 @@ namespace XwDiskSpace
             if(listViewResult.Columns.Count == 0)
                 return;
 
-            listViewResult.Columns[0].Width = 200;
-            listViewResult.Columns[1].Width = 200;
-            listViewResult.Columns[2].Width = 100;
-            listViewResult.Columns[3].Width = listViewResult.Width - 20 - 500;
+            listViewResult.Columns[1].Width = 150;
+            listViewResult.Columns[0].Width = listViewResult.Width - 20 - 150;
         }
 
         //*************************************************************************************************************
@@ -67,20 +67,41 @@ namespace XwDiskSpace
             long folderSize = 0;
             DirectoryInfo root = null;
 
+            if (level == 1)
+            {
+                BeginInvoke((Action)(() =>
+                {
+                    AddLog($"Entering '{path}'...");
+                }));
+            }
+            
             try
             {
                 root = new DirectoryInfo(path);
                 var objs = root.EnumerateFileSystemInfos();
+                
                 foreach (var o in objs)
                 {
-                    if (o.Attributes.HasFlag(FileAttributes.Directory))
+                    try
                     {
-                        folderSize += ProcessFolder(o.FullName, level + 1);
+                        if (o.Attributes.HasFlag(FileAttributes.Directory))
+                        {
+                            totalFoldersSoFar++;
+                            folderSize += ProcessFolder(o.FullName, level + 1);
+                        }
+                        else
+                        {
+                            totalFilesSoFar++;
+                            folderSize += ((FileInfo)o).Length;
+                        }
                     }
-                    
-                    if (o.Attributes.HasFlag(FileAttributes.Archive))
+                    catch (Exception ex)
                     {
-                        folderSize += ((FileInfo)o).Length;
+                        BeginInvoke((Action)(() =>
+                        {
+                            AddLog(o.FullName);
+                            AddLog(ex.Message);
+                        }));
                     }
                 }
             }
@@ -92,45 +113,16 @@ namespace XwDiskSpace
                 }));
             }
 
-            /*
-            try
-            {
-                root = new DirectoryInfo(path);
-                var files = root.EnumerateFiles();
-                foreach (FileInfo file in files)
-                {
-                    try
-                    {
-                        folderSize += file.Length;
-                    }
-                    catch (Exception ex)
-                    {
-                        AddLog(ex.Message);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                AddLog(ex.Message);
-            }
-            
-            try
-            { 
-                var folders = root.EnumerateDirectories();
-                foreach (DirectoryInfo folder in folders)
-                {
-                    folderSize += ProcessFolder(folder.FullName, level+1);
-                }
-            }
-            catch (Exception ex)
-            {
-                AddLog(ex.Message);
-            }
-            */
-
             if (level == 1)
+            {
                 FolderSizes.Add(path, folderSize);
-            
+                BeginInvoke((Action)(() =>
+                {
+                    AddLog($"Folder space: {GetFileSize(folderSize)}");
+                }));
+            }
+
+            totalSpaceSoFar += folderSize;
             return folderSize;
         }
         
@@ -155,12 +147,22 @@ namespace XwDiskSpace
         //*************************************************************************************************************
         private void buttonCalculate_Click(object sender, EventArgs e)
         {
+            if (!Directory.Exists(textStartPath.Text))
+            {
+                MessageBox.Show("Path does not exists");
+                return;
+            }
+
             textBoxLog.Text = "";
             listViewResult.Items.Clear();
             FolderSizes.Clear();
+            totalFilesSoFar = 0;
+            totalFoldersSoFar = 0;
+            totalSpaceSoFar = 0;
 
             AddLog("Running...");
             runTime.Start();
+            timer1.Start();
 
             Task.Run( () =>
             {
@@ -185,10 +187,51 @@ namespace XwDiskSpace
                 BeginInvoke((Action)(() =>
                 {
                     runTime.Stop();
-                    AddLog(runTime.Elapsed.ToString());
+                    if (totalFoldersSoFar > 0)
+                    {
+                        AddLog(runTime.Elapsed.ToString());
+                        PrintTotals();
+                        UpdateTotals();
+                    }
+                    else
+                        AddLog("Path has no subfolders");
+                    
                     AddLog("========== DONE ===========");
+                    timer1.Stop();
                 }));
             });
+        }
+
+        //*************************************************************************************************************
+        private void buttonBrowse_Click(object sender, EventArgs e)
+        {
+            if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
+            {
+                textStartPath.Text = folderBrowserDialog1.SelectedPath;
+                textBoxLog.Text = "";
+                FolderSizes.Clear();
+                listViewResult.Items.Clear();
+            }
+        }
+
+        //*************************************************************************************************************
+        private void PrintTotals()
+        {
+            AddLog($"Folders: {totalFoldersSoFar}, Folders: {totalFilesSoFar}, Space: {GetFileSize(totalSpaceSoFar)}");
+        }
+
+        //*************************************************************************************************************
+        private void UpdateTotals()
+        {
+            labelTotalFolders.Text = totalFoldersSoFar.ToString();
+            labelTotalFiles.Text = totalFilesSoFar.ToString();
+            labelTotalSpace.Text = GetFileSize(totalSpaceSoFar);
+        }
+
+        //*************************************************************************************************************
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            UpdateTotals();
         }
     }
 }
