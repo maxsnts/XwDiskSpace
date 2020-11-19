@@ -37,13 +37,14 @@
             this.textBoxLog = new System.Windows.Forms.TextBox();
             this.buttonCalculate = new System.Windows.Forms.Button();
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
-            this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.timerTotal = new System.Windows.Forms.Timer(this.components);
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.labelTotalFolders = new System.Windows.Forms.Label();
             this.labelTotalFiles = new System.Windows.Forms.Label();
             this.labelTotalSpace = new System.Windows.Forms.Label();
+            this.timerGrid = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
             // 
             // textStartPath
@@ -118,8 +119,8 @@
             // 
             // timer1
             // 
-            this.timer1.Interval = 1000;
-            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            this.timerTotal.Interval = 1000;
+            this.timerTotal.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // label2
             // 
@@ -172,6 +173,11 @@
             this.labelTotalSpace.Size = new System.Drawing.Size(161, 17);
             this.labelTotalSpace.TabIndex = 15;
             // 
+            // timerGrid
+            // 
+            this.timerGrid.Interval = 5000;
+            this.timerGrid.Tick += new System.EventHandler(this.timerGrid_Tick);
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -210,13 +216,14 @@
         private System.Windows.Forms.TextBox textBoxLog;
         private System.Windows.Forms.Button buttonCalculate;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
-        private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.Timer timerTotal;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label labelTotalFolders;
         private System.Windows.Forms.Label labelTotalFiles;
         private System.Windows.Forms.Label labelTotalSpace;
+        private System.Windows.Forms.Timer timerGrid;
     }
 }
 

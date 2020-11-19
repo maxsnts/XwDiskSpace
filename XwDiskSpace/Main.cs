@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,7 +11,7 @@ namespace XwDiskSpace
 {
     public partial class Main : Form
     {
-        private ImageList imageList = new ImageList();
+        //private ImageList imageList = new ImageList();
         private Dictionary<string, long> FolderSizes = new Dictionary<string, long>();
         private Stopwatch runTime = new Stopwatch();
         long totalFilesSoFar = 0;
@@ -37,7 +38,7 @@ namespace XwDiskSpace
             textStartPath.Text = @"\\storage\users\Max";
 #endif
 
-            listViewResult.SmallImageList = imageList;
+            //listViewResult.SmallImageList = imageList;
             listViewResult.FullRowSelect = true;
             listViewResult.Columns.Add("Path");
             listViewResult.Columns.Add("size");
@@ -58,7 +59,6 @@ namespace XwDiskSpace
         private void AddLog(string log)
         {
             textBoxLog.AppendText(log + "\r\n");
-            Refresh();
         }
 
         //*************************************************************************************************************
@@ -92,7 +92,9 @@ namespace XwDiskSpace
                         else
                         {
                             totalFilesSoFar++;
-                            folderSize += ((FileInfo)o).Length;
+                            long fileSize = ((FileInfo)o).Length;
+                            folderSize += fileSize;
+                            totalSpaceSoFar += fileSize;
                         }
                     }
                     catch (Exception ex)
@@ -122,23 +124,28 @@ namespace XwDiskSpace
                 }));
             }
 
-            totalSpaceSoFar += folderSize;
             return folderSize;
         }
         
         //*************************************************************************************************************
         private string GetFileSize(double byteCount)
         {
+            long m = 1024;
+            double m4 = Math.Pow(m, 4);
+            double m3 = Math.Pow(m, 3);
+            double m2 = Math.Pow(m, 2);
             string size = "0 Bytes";
             if (byteCount == 0)
                 size = "0 B";
-            else if (byteCount >= (1024 * 1024 * 1024))
-                size = String.Format("{0:##.00}", byteCount / (1024 * 1024 * 1024)) + " Gb";
-            else if (byteCount >= (1024 * 1024))
-                size = String.Format("{0:##.00}", byteCount / (1024 * 1024)) + " Mb";
-            else if (byteCount >= 1024)
-                size = String.Format("{0:##.00}", byteCount / 1024) + " Kb";
-            else if (byteCount < 1024)
+            //else if (byteCount >= m4)
+            //    size = String.Format("{0:##.00}", byteCount / m4) + " TB";
+            else if (byteCount >= m3)
+                size = String.Format("{0:##.00}", byteCount / m3) + " GB";
+            else if (byteCount >= m2)
+                size = String.Format("{0:##.00}", byteCount / m2) + " MB";
+            else if (byteCount >= m)
+                size = String.Format("{0:##.00}", byteCount / m) + " KB";
+            else if (byteCount < m)
                 size = String.Format("{0:##}", byteCount) + " B";
 
             return size;
@@ -162,28 +169,12 @@ namespace XwDiskSpace
 
             AddLog("Running...");
             runTime.Start();
-            timer1.Start();
+            timerTotal.Start();
+            timerGrid.Start(); ;
 
             Task.Run( () =>
             {
                 ProcessFolder(textStartPath.Text);
-                var ordered = FolderSizes.OrderByDescending(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
-
-                int top = 500;
-                foreach (var f in ordered)
-                {   if (top-- == 0)
-                        break;
-                    ListViewItem item = new ListViewItem();
-                    item.ImageIndex = 0;
-                    item.Text = f.Key;
-                    item.SubItems.Add(GetFileSize(f.Value));
-
-                    BeginInvoke((Action)(() =>
-                    {
-                        listViewResult.Items.Add(item);
-                    }));
-                }
-
                 BeginInvoke((Action)(() =>
                 {
                     runTime.Stop();
@@ -197,7 +188,9 @@ namespace XwDiskSpace
                         AddLog("Path has no subfolders");
                     
                     AddLog("========== DONE ===========");
-                    timer1.Stop();
+                    timerTotal.Stop();
+                    timerGrid.Stop();
+                    UpdateGrid();
                 }));
             });
         }
@@ -232,6 +225,34 @@ namespace XwDiskSpace
         private void timer1_Tick(object sender, EventArgs e)
         {
             UpdateTotals();
+        }
+
+        //*************************************************************************************************************
+        private void UpdateGrid()
+        {
+            listViewResult.SuspendLayout();
+            var ordered = FolderSizes.OrderByDescending(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
+            listViewResult.Items.Clear();
+            int top = 5000;
+            foreach (var f in ordered)
+            {
+                if (top-- == 0)
+                    break;
+                ListViewItem item = new ListViewItem();
+                item.ImageIndex = 0;
+                item.Text = f.Key;
+                item.SubItems.Add(GetFileSize(f.Value));
+                if (top % 2 != 0)
+                    item.BackColor = Color.WhiteSmoke;
+                listViewResult.Items.Add(item);
+            }
+            listViewResult.ResumeLayout();
+        }
+
+        //*************************************************************************************************************
+        private void timerGrid_Tick(object sender, EventArgs e)
+        {
+            UpdateGrid();
         }
     }
 }
