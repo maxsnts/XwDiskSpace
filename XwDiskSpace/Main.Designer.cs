@@ -92,6 +92,7 @@
             this.listViewResult.TabIndex = 7;
             this.listViewResult.UseCompatibleStateImageBehavior = false;
             this.listViewResult.View = System.Windows.Forms.View.Details;
+            this.listViewResult.DoubleClick += new System.EventHandler(this.listViewResult_DoubleClick);
             // 
             // textBoxLog
             // 
@@ -117,9 +118,9 @@
             this.buttonCalculate.UseVisualStyleBackColor = true;
             this.buttonCalculate.Click += new System.EventHandler(this.buttonCalculate_Click);
             // 
-            // timer1
+            // timerTotal
             // 
-            this.timerTotal.Interval = 1000;
+            this.timerTotal.Interval = 500;
             this.timerTotal.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // label2

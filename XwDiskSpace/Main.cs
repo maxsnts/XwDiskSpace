@@ -17,7 +17,7 @@ namespace XwDiskSpace
         long totalFilesSoFar = 0;
         long totalFoldersSoFar = 0;
         long totalSpaceSoFar = 0;
-
+        
         //*************************************************************************************************************
         public Main()
         {
@@ -34,25 +34,27 @@ namespace XwDiskSpace
         private void Main_Load(object sender, EventArgs e)
         {
 #if DEBUG
-            textStartPath.Text = @"C:\data"; 
+            textStartPath.Text = @"C:\data";
             textStartPath.Text = @"\\storage\users\Max";
 #endif
 
             //listViewResult.SmallImageList = imageList;
             listViewResult.FullRowSelect = true;
             listViewResult.Columns.Add("Path");
-            listViewResult.Columns.Add("size");
+            listViewResult.Columns.Add("%").TextAlign = HorizontalAlignment.Right;
+            listViewResult.Columns.Add("size").TextAlign = HorizontalAlignment.Right;
             Main_Resize(sender, e);
         }
 
         //*************************************************************************************************************
         private void Main_Resize(object sender, EventArgs e)
         {
-            if(listViewResult.Columns.Count == 0)
+            if (listViewResult.Columns.Count == 0)
                 return;
 
-            listViewResult.Columns[1].Width = 150;
-            listViewResult.Columns[0].Width = listViewResult.Width - 20 - 150;
+            listViewResult.Columns[2].Width = 100;
+            listViewResult.Columns[1].Width = 60;
+            listViewResult.Columns[0].Width = listViewResult.Width - 20 - 160;
         }
 
         //*************************************************************************************************************
@@ -74,12 +76,12 @@ namespace XwDiskSpace
                     AddLog($"Entering '{path}'...");
                 }));
             }
-            
+
             try
             {
                 root = new DirectoryInfo(path);
                 var objs = root.EnumerateFileSystemInfos();
-                
+
                 foreach (var o in objs)
                 {
                     try
@@ -126,7 +128,7 @@ namespace XwDiskSpace
 
             return folderSize;
         }
-        
+
         //*************************************************************************************************************
         private string GetFileSize(double byteCount)
         {
@@ -135,18 +137,16 @@ namespace XwDiskSpace
             double m3 = Math.Pow(m, 3);
             double m2 = Math.Pow(m, 2);
             string size = "0 Bytes";
-            if (byteCount == 0)
-                size = "0 B";
-            //else if (byteCount >= m4)
-            //    size = String.Format("{0:##.00}", byteCount / m4) + " TB";
+            if (byteCount >= m4)
+                size = String.Format("{0:0.00}", byteCount / m4) + " TB";
             else if (byteCount >= m3)
-                size = String.Format("{0:##.00}", byteCount / m3) + " GB";
+                size = String.Format("{0:0.00}", byteCount / m3) + " GB";
             else if (byteCount >= m2)
-                size = String.Format("{0:##.00}", byteCount / m2) + " MB";
+                size = String.Format("{0:0.00}", byteCount / m2) + " MB";
             else if (byteCount >= m)
-                size = String.Format("{0:##.00}", byteCount / m) + " KB";
+                size = String.Format("{0:0.00}", byteCount / m) + " KB";
             else if (byteCount < m)
-                size = String.Format("{0:##}", byteCount) + " B";
+                size = String.Format("{0:0}", byteCount) + " B";
 
             return size;
         }
@@ -160,6 +160,9 @@ namespace XwDiskSpace
                 return;
             }
 
+            textStartPath.Enabled = false;
+            buttonBrowse.Enabled = false;
+            buttonCalculate.Enabled = false;
             textBoxLog.Text = "";
             listViewResult.Items.Clear();
             FolderSizes.Clear();
@@ -172,7 +175,7 @@ namespace XwDiskSpace
             timerTotal.Start();
             timerGrid.Start(); ;
 
-            Task.Run( () =>
+            Task.Run(() =>
             {
                 ProcessFolder(textStartPath.Text);
                 BeginInvoke((Action)(() =>
@@ -186,11 +189,14 @@ namespace XwDiskSpace
                     }
                     else
                         AddLog("Path has no subfolders");
-                    
+
                     AddLog("========== DONE ===========");
                     timerTotal.Stop();
                     timerGrid.Stop();
                     UpdateGrid();
+                    textStartPath.Enabled = true;
+                    buttonBrowse.Enabled = true;
+                    buttonCalculate.Enabled = true;
                 }));
             });
         }
@@ -241,6 +247,7 @@ namespace XwDiskSpace
                 ListViewItem item = new ListViewItem();
                 item.ImageIndex = 0;
                 item.Text = f.Key;
+                item.SubItems.Add(string.Format("{0:0.00} %", ((double)f.Value) * 100 / totalSpaceSoFar));
                 item.SubItems.Add(GetFileSize(f.Value));
                 if (top % 2 != 0)
                     item.BackColor = Color.WhiteSmoke;
@@ -253,6 +260,23 @@ namespace XwDiskSpace
         private void timerGrid_Tick(object sender, EventArgs e)
         {
             UpdateGrid();
+        }
+
+        //*************************************************************************************************************
+        private void listViewResult_DoubleClick(object sender, EventArgs e)
+        {
+            if (buttonCalculate.Enabled == false)
+            {
+                MessageBox.Show("Wait for current operation to end");
+                return;
+            }
+
+            if (listViewResult.SelectedItems.Count == 1)
+            {
+                var item = listViewResult.SelectedItems[0];
+                textStartPath.Text = item.SubItems[0].Text;
+                buttonCalculate_Click(sender, e);
+            }
         }
     }
 }
