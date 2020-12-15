@@ -11,18 +11,18 @@ namespace XwDiskSpace
 {
     public partial class Main : Form
     {
-        //private ImageList imageList = new ImageList();
-        private Dictionary<string, long> FolderSizes = new Dictionary<string, long>();
+        private Dictionary<string, FolderInfo> FolderSizes = new Dictionary<string, FolderInfo>();
         private Stopwatch runTime = new Stopwatch();
         long totalFilesSoFar = 0;
         long totalFoldersSoFar = 0;
         long totalSpaceSoFar = 0;
-        
+
+        long CurrentFolderSize = 0;
+        long CurrentFolderFiles = 0;
+
         //*************************************************************************************************************
         public Main()
         {
-            //imageList.Images.Add(global::XwNoNagle.Properties.Resources.nic);   //0
-
             InitializeComponent();
 
             string CurrentVersion = System.Diagnostics.FileVersionInfo.GetVersionInfo(
@@ -41,6 +41,7 @@ namespace XwDiskSpace
             //listViewResult.SmallImageList = imageList;
             listViewResult.FullRowSelect = true;
             listViewResult.Columns.Add("Path");
+            listViewResult.Columns.Add("files").TextAlign = HorizontalAlignment.Right;
             listViewResult.Columns.Add("%").TextAlign = HorizontalAlignment.Right;
             listViewResult.Columns.Add("size").TextAlign = HorizontalAlignment.Right;
             Main_Resize(sender, e);
@@ -52,28 +53,30 @@ namespace XwDiskSpace
             if (listViewResult.Columns.Count == 0)
                 return;
 
-            listViewResult.Columns[2].Width = 100;
-            listViewResult.Columns[1].Width = 60;
-            listViewResult.Columns[0].Width = listViewResult.Width - 20 - 160;
+            listViewResult.Columns[3].Width = 100;
+            listViewResult.Columns[2].Width = 60;
+            listViewResult.Columns[1].Width = 100;
+            listViewResult.Columns[0].Width = listViewResult.Width - 20 - 260;
         }
 
         //*************************************************************************************************************
-        private void AddLog(string log)
+        private void AddLog(string log, bool addNewLine = true)
         {
-            textBoxLog.AppendText(log + "\r\n");
+            textBoxLog.AppendText(log);
+            if (addNewLine)
+                textBoxLog.AppendText("\r\n");
         }
 
         //*************************************************************************************************************
-        private long ProcessFolder(string path, int level = 0)
+        private void ProcessFolder(string path, int level = 0)
         {
-            long folderSize = 0;
             DirectoryInfo root = null;
 
             if (level == 1)
             {
                 BeginInvoke((Action)(() =>
                 {
-                    AddLog($"Entering '{path}'...");
+                    AddLog($"Entering '{path}'...", false);
                 }));
             }
 
@@ -89,13 +92,14 @@ namespace XwDiskSpace
                         if (o.Attributes.HasFlag(FileAttributes.Directory))
                         {
                             totalFoldersSoFar++;
-                            folderSize += ProcessFolder(o.FullName, level + 1);
+                            ProcessFolder(o.FullName, level + 1);
                         }
                         else
                         {
                             totalFilesSoFar++;
                             long fileSize = ((FileInfo)o).Length;
-                            folderSize += fileSize;
+                            CurrentFolderSize += fileSize;
+                            CurrentFolderFiles++;
                             totalSpaceSoFar += fileSize;
                         }
                     }
@@ -119,14 +123,17 @@ namespace XwDiskSpace
 
             if (level == 1)
             {
-                FolderSizes.Add(path, folderSize);
+                FolderInfo finfo = new FolderInfo();
+                finfo.Size = CurrentFolderSize;
+                finfo.Files = CurrentFolderFiles;
+                FolderSizes.Add(path, finfo);
+                CurrentFolderSize = 0;
+                CurrentFolderFiles = 0;
                 BeginInvoke((Action)(() =>
                 {
-                    AddLog($"Folder space: {GetFileSize(folderSize)}");
+                    AddLog($"=> {GetFileSize(finfo.Size)}");
                 }));
             }
-
-            return folderSize;
         }
 
         //*************************************************************************************************************
@@ -237,7 +244,7 @@ namespace XwDiskSpace
         private void UpdateGrid()
         {
             listViewResult.SuspendLayout();
-            var ordered = FolderSizes.OrderByDescending(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
+            var ordered = FolderSizes.OrderByDescending(x => x.Value.Size).ToDictionary(x => x.Key, x => x.Value);
             listViewResult.Items.Clear();
             int top = 5000;
             foreach (var f in ordered)
@@ -247,8 +254,9 @@ namespace XwDiskSpace
                 ListViewItem item = new ListViewItem();
                 item.ImageIndex = 0;
                 item.Text = f.Key;
-                item.SubItems.Add(string.Format("{0:0.00} %", ((double)f.Value) * 100 / totalSpaceSoFar));
-                item.SubItems.Add(GetFileSize(f.Value));
+                item.SubItems.Add(f.Value.Files.ToString());
+                item.SubItems.Add(string.Format("{0:0.00} %", ((double)f.Value.Size) * 100 / totalSpaceSoFar));
+                item.SubItems.Add(GetFileSize(f.Value.Size));
                 if (top % 2 != 0)
                     item.BackColor = Color.WhiteSmoke;
                 listViewResult.Items.Add(item);
