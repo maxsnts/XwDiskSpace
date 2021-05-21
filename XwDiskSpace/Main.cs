@@ -35,7 +35,6 @@ namespace XwDiskSpace
         {
 #if DEBUG
             textStartPath.Text = @"C:\data";
-            textStartPath.Text = @"\\storage\users\Max";
 #endif
 
             //listViewResult.SmallImageList = imageList;
@@ -284,6 +283,30 @@ namespace XwDiskSpace
                 var item = listViewResult.SelectedItems[0];
                 textStartPath.Text = item.SubItems[0].Text;
                 buttonCalculate_Click(sender, e);
+            }
+        }
+
+        //*************************************************************************************************************
+        private void buttonExport_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+            saveFileDialog1.Filter = "Text file|*.txt";
+            saveFileDialog1.Title = "Export list to txt file";
+            saveFileDialog1.ShowDialog();
+
+            if (saveFileDialog1.FileName != "")
+            {
+                string filePath = saveFileDialog1.FileName;
+                File.WriteAllText(filePath, ""); //reset
+
+                var ordered = FolderSizes.OrderByDescending(x => x.Value.Size).ToDictionary(x => x.Key, x => x.Value);
+                foreach (var f in ordered)
+                {
+                    string percent = string.Format("{0:0.00} %", ((double)f.Value.Size) * 100 / totalSpaceSoFar);
+                    string size = GetFileSize(f.Value.Size);
+                    string line = $"{percent.PadLeft(8, ' ')} | {size.PadLeft(10)} | {f.Key}\r\n";
+                    File.AppendAllText(filePath, line);
+                }
             }
         }
     }

@@ -45,6 +45,8 @@
             this.labelTotalFiles = new System.Windows.Forms.Label();
             this.labelTotalSpace = new System.Windows.Forms.Label();
             this.timerGrid = new System.Windows.Forms.Timer(this.components);
+            this.label5 = new System.Windows.Forms.Label();
+            this.buttonExport = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // textStartPath
@@ -88,7 +90,7 @@
             this.listViewResult.Location = new System.Drawing.Point(12, 241);
             this.listViewResult.MultiSelect = false;
             this.listViewResult.Name = "listViewResult";
-            this.listViewResult.Size = new System.Drawing.Size(890, 464);
+            this.listViewResult.Size = new System.Drawing.Size(890, 446);
             this.listViewResult.TabIndex = 7;
             this.listViewResult.UseCompatibleStateImageBehavior = false;
             this.listViewResult.View = System.Windows.Forms.View.Details;
@@ -135,7 +137,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(320, 219);
+            this.label3.Location = new System.Drawing.Point(251, 219);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(31, 13);
             this.label3.TabIndex = 11;
@@ -144,7 +146,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(600, 219);
+            this.label4.Location = new System.Drawing.Point(484, 219);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(41, 13);
             this.label4.TabIndex = 12;
@@ -161,7 +163,7 @@
             // labelTotalFiles
             // 
             this.labelTotalFiles.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.labelTotalFiles.Location = new System.Drawing.Point(354, 218);
+            this.labelTotalFiles.Location = new System.Drawing.Point(285, 218);
             this.labelTotalFiles.Name = "labelTotalFiles";
             this.labelTotalFiles.Size = new System.Drawing.Size(161, 17);
             this.labelTotalFiles.TabIndex = 14;
@@ -169,7 +171,7 @@
             // labelTotalSpace
             // 
             this.labelTotalSpace.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.labelTotalSpace.Location = new System.Drawing.Point(643, 218);
+            this.labelTotalSpace.Location = new System.Drawing.Point(527, 218);
             this.labelTotalSpace.Name = "labelTotalSpace";
             this.labelTotalSpace.Size = new System.Drawing.Size(161, 17);
             this.labelTotalSpace.TabIndex = 15;
@@ -179,11 +181,35 @@
             this.timerGrid.Interval = 5000;
             this.timerGrid.Tick += new System.EventHandler(this.timerGrid_Tick);
             // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(46, 695);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(815, 13);
+            this.label5.TabIndex = 16;
+            this.label5.Text = "You can double click on a item in the list to get that folder sub folders size bu" +
+    "t it recalculates all the sizes. Its done this way to keep a low memory footprin" +
+    "t on huge storages.";
+            // 
+            // buttonExport
+            // 
+            this.buttonExport.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonExport.Location = new System.Drawing.Point(755, 216);
+            this.buttonExport.Name = "buttonExport";
+            this.buttonExport.Size = new System.Drawing.Size(147, 22);
+            this.buttonExport.TabIndex = 17;
+            this.buttonExport.Text = "Export to txt file";
+            this.buttonExport.UseVisualStyleBackColor = true;
+            this.buttonExport.Click += new System.EventHandler(this.buttonExport_Click);
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(914, 717);
+            this.Controls.Add(this.buttonExport);
+            this.Controls.Add(this.label5);
             this.Controls.Add(this.labelTotalSpace);
             this.Controls.Add(this.labelTotalFiles);
             this.Controls.Add(this.labelTotalFolders);
@@ -225,6 +251,8 @@
         private System.Windows.Forms.Label labelTotalFiles;
         private System.Windows.Forms.Label labelTotalSpace;
         private System.Windows.Forms.Timer timerGrid;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Button buttonExport;
     }
 }
 
