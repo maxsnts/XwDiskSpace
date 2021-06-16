@@ -19,6 +19,7 @@ namespace XwDiskSpace
 
         long CurrentFolderSize = 0;
         long CurrentFolderFiles = 0;
+        DateTime CurrentFolderModified = DateTime.MinValue;
 
         //*************************************************************************************************************
         public Main()
@@ -43,6 +44,7 @@ namespace XwDiskSpace
             listViewResult.Columns.Add("files").TextAlign = HorizontalAlignment.Right;
             listViewResult.Columns.Add("%").TextAlign = HorizontalAlignment.Right;
             listViewResult.Columns.Add("size").TextAlign = HorizontalAlignment.Right;
+            listViewResult.Columns.Add("last modified").TextAlign = HorizontalAlignment.Right;
             Main_Resize(sender, e);
         }
 
@@ -52,10 +54,11 @@ namespace XwDiskSpace
             if (listViewResult.Columns.Count == 0)
                 return;
 
+            listViewResult.Columns[4].Width = 140;
             listViewResult.Columns[3].Width = 100;
             listViewResult.Columns[2].Width = 60;
             listViewResult.Columns[1].Width = 100;
-            listViewResult.Columns[0].Width = listViewResult.Width - 20 - 260;
+            listViewResult.Columns[0].Width = listViewResult.Width - 20 - 400;
         }
 
         //*************************************************************************************************************
@@ -100,6 +103,8 @@ namespace XwDiskSpace
                             CurrentFolderSize += fileSize;
                             CurrentFolderFiles++;
                             totalSpaceSoFar += fileSize;
+                            if (o.LastWriteTime > CurrentFolderModified)
+                                CurrentFolderModified = o.LastWriteTime;
                         }
                     }
                     catch (Exception ex)
@@ -125,9 +130,11 @@ namespace XwDiskSpace
                 FolderInfo finfo = new FolderInfo();
                 finfo.Size = CurrentFolderSize;
                 finfo.Files = CurrentFolderFiles;
+                finfo.Modified = CurrentFolderModified;
                 FolderSizes.Add(path, finfo);
                 CurrentFolderSize = 0;
                 CurrentFolderFiles = 0;
+                CurrentFolderModified = DateTime.MinValue;
                 BeginInvoke((Action)(() =>
                 {
                     AddLog($"=> {GetFileSize(finfo.Size)}");
@@ -256,6 +263,7 @@ namespace XwDiskSpace
                 item.SubItems.Add(f.Value.Files.ToString());
                 item.SubItems.Add(string.Format("{0:0.00} %", ((double)f.Value.Size) * 100 / totalSpaceSoFar));
                 item.SubItems.Add(GetFileSize(f.Value.Size));
+                item.SubItems.Add(f.Value.Modified.ToString("yyyy-MM-dd HH:mm:ss"));
                 if (top % 2 != 0)
                     item.BackColor = Color.WhiteSmoke;
                 listViewResult.Items.Add(item);
@@ -304,7 +312,8 @@ namespace XwDiskSpace
                 {
                     string percent = string.Format("{0:0.00} %", ((double)f.Value.Size) * 100 / totalSpaceSoFar);
                     string size = GetFileSize(f.Value.Size);
-                    string line = $"{percent.PadLeft(8, ' ')} | {size.PadLeft(10)} | {f.Key}\r\n";
+                    string modified = f.Value.Modified.ToString("yyyy-MM-dd HH:mm:ss");
+                    string line = $"{percent.PadLeft(8, ' ')} | {size.PadLeft(10)} | {modified} | {f.Key}\r\n";
                     File.AppendAllText(filePath, line);
                 }
             }
