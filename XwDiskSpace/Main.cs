@@ -318,5 +318,12 @@ namespace XwDiskSpace
                 }
             }
         }
+
+        //*************************************************************************************************************
+        private void Main_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (MessageBox.Show("Close window?", "Close...", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                e.Cancel = true;
+        }
     }
 }
