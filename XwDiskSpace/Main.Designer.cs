@@ -47,34 +47,40 @@
             this.timerGrid = new System.Windows.Forms.Timer(this.components);
             this.label5 = new System.Windows.Forms.Label();
             this.buttonExport = new System.Windows.Forms.Button();
+            this.labelCurrentSpace = new System.Windows.Forms.Label();
+            this.labelCurrentFiles = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // textStartPath
             // 
             this.textStartPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textStartPath.Location = new System.Drawing.Point(49, 11);
-            this.textStartPath.Margin = new System.Windows.Forms.Padding(2);
+            this.textStartPath.Location = new System.Drawing.Point(98, 21);
+            this.textStartPath.Margin = new System.Windows.Forms.Padding(4);
             this.textStartPath.Name = "textStartPath";
-            this.textStartPath.Size = new System.Drawing.Size(671, 20);
+            this.textStartPath.Size = new System.Drawing.Size(1338, 31);
             this.textStartPath.TabIndex = 0;
             this.textStartPath.WordWrap = false;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(12, 14);
+            this.label1.Location = new System.Drawing.Point(24, 27);
+            this.label1.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(32, 13);
+            this.label1.Size = new System.Drawing.Size(62, 25);
             this.label1.TabIndex = 1;
             this.label1.Text = "Path:";
             // 
             // buttonBrowse
             // 
             this.buttonBrowse.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonBrowse.Location = new System.Drawing.Point(725, 10);
+            this.buttonBrowse.Location = new System.Drawing.Point(1450, 19);
+            this.buttonBrowse.Margin = new System.Windows.Forms.Padding(6);
             this.buttonBrowse.Name = "buttonBrowse";
-            this.buttonBrowse.Size = new System.Drawing.Size(24, 22);
+            this.buttonBrowse.Size = new System.Drawing.Size(48, 42);
             this.buttonBrowse.TabIndex = 2;
             this.buttonBrowse.Text = "...";
             this.buttonBrowse.UseVisualStyleBackColor = true;
@@ -87,10 +93,11 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.listViewResult.GridLines = true;
             this.listViewResult.HideSelection = false;
-            this.listViewResult.Location = new System.Drawing.Point(12, 241);
+            this.listViewResult.Location = new System.Drawing.Point(24, 463);
+            this.listViewResult.Margin = new System.Windows.Forms.Padding(6);
             this.listViewResult.MultiSelect = false;
             this.listViewResult.Name = "listViewResult";
-            this.listViewResult.Size = new System.Drawing.Size(890, 446);
+            this.listViewResult.Size = new System.Drawing.Size(1776, 854);
             this.listViewResult.TabIndex = 7;
             this.listViewResult.UseCompatibleStateImageBehavior = false;
             this.listViewResult.View = System.Windows.Forms.View.Details;
@@ -101,20 +108,22 @@
             this.textBoxLog.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBoxLog.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBoxLog.Location = new System.Drawing.Point(12, 38);
+            this.textBoxLog.Location = new System.Drawing.Point(24, 73);
+            this.textBoxLog.Margin = new System.Windows.Forms.Padding(6);
             this.textBoxLog.Multiline = true;
             this.textBoxLog.Name = "textBoxLog";
             this.textBoxLog.ReadOnly = true;
             this.textBoxLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBoxLog.Size = new System.Drawing.Size(890, 173);
+            this.textBoxLog.Size = new System.Drawing.Size(1776, 283);
             this.textBoxLog.TabIndex = 8;
             // 
             // buttonCalculate
             // 
             this.buttonCalculate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonCalculate.Location = new System.Drawing.Point(755, 10);
+            this.buttonCalculate.Location = new System.Drawing.Point(1510, 19);
+            this.buttonCalculate.Margin = new System.Windows.Forms.Padding(6);
             this.buttonCalculate.Name = "buttonCalculate";
-            this.buttonCalculate.Size = new System.Drawing.Size(147, 22);
+            this.buttonCalculate.Size = new System.Drawing.Size(294, 42);
             this.buttonCalculate.TabIndex = 9;
             this.buttonCalculate.Text = "Get Subfolders Space";
             this.buttonCalculate.UseVisualStyleBackColor = true;
@@ -128,52 +137,58 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(12, 219);
+            this.label2.Location = new System.Drawing.Point(30, 424);
+            this.label2.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(44, 13);
+            this.label2.Size = new System.Drawing.Size(137, 25);
             this.label2.TabIndex = 10;
-            this.label2.Text = "Folders:";
+            this.label2.Text = "Total folders:";
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(251, 219);
+            this.label3.Location = new System.Drawing.Point(525, 424);
+            this.label3.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(31, 13);
+            this.label3.Size = new System.Drawing.Size(159, 25);
             this.label3.TabIndex = 11;
-            this.label3.Text = "Files:";
+            this.label3.Text = "Total file count:";
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(484, 219);
+            this.label4.Location = new System.Drawing.Point(1064, 424);
+            this.label4.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(41, 13);
+            this.label4.Size = new System.Drawing.Size(130, 25);
             this.label4.TabIndex = 12;
-            this.label4.Text = "Space:";
+            this.label4.Text = "Total space:";
             // 
             // labelTotalFolders
             // 
             this.labelTotalFolders.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.labelTotalFolders.Location = new System.Drawing.Point(57, 218);
+            this.labelTotalFolders.Location = new System.Drawing.Point(179, 420);
+            this.labelTotalFolders.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.labelTotalFolders.Name = "labelTotalFolders";
-            this.labelTotalFolders.Size = new System.Drawing.Size(161, 17);
+            this.labelTotalFolders.Size = new System.Drawing.Size(222, 33);
             this.labelTotalFolders.TabIndex = 13;
             // 
             // labelTotalFiles
             // 
             this.labelTotalFiles.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.labelTotalFiles.Location = new System.Drawing.Point(285, 218);
+            this.labelTotalFiles.Location = new System.Drawing.Point(696, 420);
+            this.labelTotalFiles.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.labelTotalFiles.Name = "labelTotalFiles";
-            this.labelTotalFiles.Size = new System.Drawing.Size(161, 17);
+            this.labelTotalFiles.Size = new System.Drawing.Size(235, 33);
             this.labelTotalFiles.TabIndex = 14;
             // 
             // labelTotalSpace
             // 
             this.labelTotalSpace.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.labelTotalSpace.Location = new System.Drawing.Point(527, 218);
+            this.labelTotalSpace.Location = new System.Drawing.Point(1206, 421);
+            this.labelTotalSpace.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.labelTotalSpace.Name = "labelTotalSpace";
-            this.labelTotalSpace.Size = new System.Drawing.Size(161, 17);
+            this.labelTotalSpace.Size = new System.Drawing.Size(230, 33);
             this.labelTotalSpace.TabIndex = 15;
             // 
             // timerGrid
@@ -186,9 +201,10 @@
             this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(46, 695);
+            this.label5.Location = new System.Drawing.Point(92, 1337);
+            this.label5.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(815, 13);
+            this.label5.Size = new System.Drawing.Size(1662, 25);
             this.label5.TabIndex = 16;
             this.label5.Text = "You can double click on a item in the list to get that folder sub folders size bu" +
     "t it recalculates all the sizes. Its done this way to keep a low memory footprin" +
@@ -197,19 +213,62 @@
             // buttonExport
             // 
             this.buttonExport.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonExport.Location = new System.Drawing.Point(755, 216);
+            this.buttonExport.Location = new System.Drawing.Point(1574, 415);
+            this.buttonExport.Margin = new System.Windows.Forms.Padding(6);
             this.buttonExport.Name = "buttonExport";
-            this.buttonExport.Size = new System.Drawing.Size(147, 22);
+            this.buttonExport.Size = new System.Drawing.Size(230, 42);
             this.buttonExport.TabIndex = 17;
             this.buttonExport.Text = "Export to txt file";
             this.buttonExport.UseVisualStyleBackColor = true;
             this.buttonExport.Click += new System.EventHandler(this.buttonExport_Click);
             // 
+            // labelCurrentSpace
+            // 
+            this.labelCurrentSpace.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.labelCurrentSpace.Location = new System.Drawing.Point(1206, 368);
+            this.labelCurrentSpace.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.labelCurrentSpace.Name = "labelCurrentSpace";
+            this.labelCurrentSpace.Size = new System.Drawing.Size(230, 33);
+            this.labelCurrentSpace.TabIndex = 21;
+            // 
+            // labelCurrentFiles
+            // 
+            this.labelCurrentFiles.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.labelCurrentFiles.Location = new System.Drawing.Point(696, 367);
+            this.labelCurrentFiles.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.labelCurrentFiles.Name = "labelCurrentFiles";
+            this.labelCurrentFiles.Size = new System.Drawing.Size(235, 33);
+            this.labelCurrentFiles.TabIndex = 20;
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(1041, 369);
+            this.label8.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(153, 25);
+            this.label8.TabIndex = 19;
+            this.label8.Text = "Current space:";
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(502, 369);
+            this.label9.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(182, 25);
+            this.label9.TabIndex = 18;
+            this.label9.Text = "Current file count:";
+            // 
             // Main
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(914, 717);
+            this.ClientSize = new System.Drawing.Size(1828, 1379);
+            this.Controls.Add(this.labelCurrentSpace);
+            this.Controls.Add(this.labelCurrentFiles);
+            this.Controls.Add(this.label8);
+            this.Controls.Add(this.label9);
             this.Controls.Add(this.buttonExport);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.labelTotalSpace);
@@ -225,7 +284,7 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.textStartPath);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(2);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "Main";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "XwDiskSpace";
@@ -256,6 +315,10 @@
         private System.Windows.Forms.Timer timerGrid;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Button buttonExport;
+        private System.Windows.Forms.Label labelCurrentSpace;
+        private System.Windows.Forms.Label labelCurrentFiles;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Label label9;
     }
 }
 

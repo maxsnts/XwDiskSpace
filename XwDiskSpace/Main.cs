@@ -16,12 +16,11 @@ namespace XwDiskSpace
         long totalFilesSoFar = 0;
         long totalFoldersSoFar = 0;
         long totalSpaceSoFar = 0;
-
         long CurrentFolderSize = 0;
         long CurrentFolderFiles = 0;
         DateTime CurrentFolderModified = DateTime.MinValue;
 
-        //*************************************************************************************************************
+        //****************************************************************************************************
         public Main()
         {
             InitializeComponent();
@@ -31,11 +30,12 @@ namespace XwDiskSpace
             Text = $"XwDiskSpace v{CurrentVersion}";
         }
 
-        //*************************************************************************************************************
+        //****************************************************************************************************
         private void Main_Load(object sender, EventArgs e)
         {
 #if DEBUG
             textStartPath.Text = @"C:\data";
+            textStartPath.Text = @"\\marta\Servers\Carolina\Synology1";
 #endif
 
             //listViewResult.SmallImageList = imageList;
@@ -48,7 +48,7 @@ namespace XwDiskSpace
             Main_Resize(sender, e);
         }
 
-        //*************************************************************************************************************
+        //****************************************************************************************************
         private void Main_Resize(object sender, EventArgs e)
         {
             if (listViewResult.Columns.Count == 0)
@@ -61,7 +61,7 @@ namespace XwDiskSpace
             listViewResult.Columns[0].Width = listViewResult.Width - 20 - 400;
         }
 
-        //*************************************************************************************************************
+        //****************************************************************************************************
         private void AddLog(string log, bool addNewLine = true)
         {
             textBoxLog.AppendText(log);
@@ -69,7 +69,7 @@ namespace XwDiskSpace
                 textBoxLog.AppendText("\r\n");
         }
 
-        //*************************************************************************************************************
+        //****************************************************************************************************
         private void ProcessFolder(string path, int level = 0)
         {
             DirectoryInfo root = null;
@@ -142,7 +142,7 @@ namespace XwDiskSpace
             }
         }
 
-        //*************************************************************************************************************
+        //****************************************************************************************************
         private string GetFileSize(double byteCount)
         {
             long m = 1024;
@@ -164,7 +164,7 @@ namespace XwDiskSpace
             return size;
         }
 
-        //*************************************************************************************************************
+        //****************************************************************************************************
         private void buttonCalculate_Click(object sender, EventArgs e)
         {
             if (!Directory.Exists(textStartPath.Text))
@@ -214,7 +214,7 @@ namespace XwDiskSpace
             });
         }
 
-        //*************************************************************************************************************
+        //****************************************************************************************************
         private void buttonBrowse_Click(object sender, EventArgs e)
         {
             if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
@@ -226,30 +226,32 @@ namespace XwDiskSpace
             }
         }
 
-        //*************************************************************************************************************
+        //****************************************************************************************************
         private void PrintTotals()
         {
             AddLog($"Folders: {totalFoldersSoFar}, Folders: {totalFilesSoFar}, Space: {GetFileSize(totalSpaceSoFar)}");
         }
 
-        //*************************************************************************************************************
+        //****************************************************************************************************
         private void UpdateTotals()
         {
+            labelCurrentFiles.Text = CurrentFolderFiles.ToString();
+            labelCurrentSpace.Text = GetFileSize(CurrentFolderSize);
             labelTotalFolders.Text = totalFoldersSoFar.ToString();
             labelTotalFiles.Text = totalFilesSoFar.ToString();
             labelTotalSpace.Text = GetFileSize(totalSpaceSoFar);
         }
 
-        //*************************************************************************************************************
+        //***************************************************************************************************
         private void timer1_Tick(object sender, EventArgs e)
         {
             UpdateTotals();
         }
 
-        //*************************************************************************************************************
+        //****************************************************************************************************
         private void UpdateGrid()
         {
-            listViewResult.SuspendLayout();
+            listViewResult.BeginUpdate();
             var ordered = FolderSizes.OrderByDescending(x => x.Value.Size).ToDictionary(x => x.Key, x => x.Value);
             listViewResult.Items.Clear();
             int top = 5000;
@@ -268,16 +270,16 @@ namespace XwDiskSpace
                     item.BackColor = Color.WhiteSmoke;
                 listViewResult.Items.Add(item);
             }
-            listViewResult.ResumeLayout();
+            listViewResult.EndUpdate();
         }
 
-        //*************************************************************************************************************
+        //****************************************************************************************************
         private void timerGrid_Tick(object sender, EventArgs e)
         {
             UpdateGrid();
         }
 
-        //*************************************************************************************************************
+        //****************************************************************************************************
         private void listViewResult_DoubleClick(object sender, EventArgs e)
         {
             if (buttonCalculate.Enabled == false)
@@ -294,7 +296,7 @@ namespace XwDiskSpace
             }
         }
 
-        //*************************************************************************************************************
+        //****************************************************************************************************
         private void buttonExport_Click(object sender, EventArgs e)
         {
             SaveFileDialog saveFileDialog1 = new SaveFileDialog();
@@ -319,10 +321,11 @@ namespace XwDiskSpace
             }
         }
 
-        //*************************************************************************************************************
+        //****************************************************************************************************
         private void Main_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (MessageBox.Show("Close window?", "Close...", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+            if (MessageBox.Show("Close window?", "Close...", 
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
                 e.Cancel = true;
         }
     }
