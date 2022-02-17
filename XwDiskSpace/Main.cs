@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -19,13 +20,14 @@ namespace XwDiskSpace
         long CurrentFolderSize = 0;
         long CurrentFolderFiles = 0;
         DateTime CurrentFolderModified = DateTime.MinValue;
+        StringBuilder Errors = new StringBuilder();
+        string CurrentVersion = "";
 
         //****************************************************************************************************
         public Main()
         {
             InitializeComponent();
-
-            string CurrentVersion = System.Diagnostics.FileVersionInfo.GetVersionInfo(
+            CurrentVersion = System.Diagnostics.FileVersionInfo.GetVersionInfo(
                System.Reflection.Assembly.GetAssembly(typeof(Main)).Location).FileVersion.ToString();
             Text = $"XwDiskSpace v{CurrentVersion}";
         }
@@ -35,7 +37,6 @@ namespace XwDiskSpace
         {
 #if DEBUG
             textStartPath.Text = @"C:\data";
-            textStartPath.Text = @"\\marta\Servers\Carolina\Synology1";
 #endif
 
             //listViewResult.SmallImageList = imageList;
@@ -62,11 +63,16 @@ namespace XwDiskSpace
         }
 
         //****************************************************************************************************
-        private void AddLog(string log, bool addNewLine = true)
+        private void AddLog(string log, bool addNewLine = true, bool error = false)
         {
-            textBoxLog.AppendText(log);
+            string msg = log;
             if (addNewLine)
-                textBoxLog.AppendText("\r\n");
+                msg += "\r\n";
+
+            textBoxLog.AppendText(msg);
+
+            if (error)
+                Errors.Append(msg);
         }
 
         //****************************************************************************************************
@@ -111,8 +117,8 @@ namespace XwDiskSpace
                     {
                         BeginInvoke((Action)(() =>
                         {
-                            AddLog(o.FullName);
-                            AddLog(ex.Message);
+                            AddLog(o.FullName, true, true);
+                            AddLog(ex.Message, true, true);
                         }));
                     }
                 }
@@ -121,7 +127,8 @@ namespace XwDiskSpace
             {
                 BeginInvoke((Action)(() =>
                 {
-                    AddLog(ex.Message);
+                    AddLog(path, true, true);
+                    AddLog(ex.Message, true, true);
                 }));
             }
 
@@ -177,6 +184,7 @@ namespace XwDiskSpace
             buttonBrowse.Enabled = false;
             buttonCalculate.Enabled = false;
             textBoxLog.Text = "";
+            Errors.Clear();
             listViewResult.Items.Clear();
             FolderSizes.Clear();
             totalFilesSoFar = 0;
@@ -307,7 +315,14 @@ namespace XwDiskSpace
             if (saveFileDialog1.FileName != "")
             {
                 string filePath = saveFileDialog1.FileName;
-                File.WriteAllText(filePath, ""); //reset
+                File.WriteAllText(filePath, $" XwDiskSpace v{CurrentVersion} export file\r\n");
+                File.AppendAllText(filePath, $"----------------------------------------------------------------------------\r\n");
+                File.AppendAllText(filePath, $" TOTAL SPACE : {GetFileSize(totalSpaceSoFar)} in {textStartPath.Text}\r\n");
+                File.AppendAllText(filePath, $"----------------------------------------------------------------------------\r\n");
+                File.AppendAllText(filePath, $" Check for erros at the end of the report ... \r\n");
+                File.AppendAllText(filePath, $"----------------------------------------------------------------------------\r\n");
+                File.AppendAllText(filePath, $" PERCENT |    SIZE    |    LAST MODIFIED    | PATH  \r\n");
+                File.AppendAllText(filePath, $"----------------------------------------------------------------------------\r\n");
 
                 var ordered = FolderSizes.OrderByDescending(x => x.Value.Size).ToDictionary(x => x.Key, x => x.Value);
                 foreach (var f in ordered)
@@ -318,6 +333,9 @@ namespace XwDiskSpace
                     string line = $"{percent.PadLeft(8, ' ')} | {size.PadLeft(10)} | {modified} | {f.Key}\r\n";
                     File.AppendAllText(filePath, line);
                 }
+
+                File.AppendAllText(filePath, $"----------------------------------------------------------------------------\r\n");
+                File.AppendAllText(filePath, Errors.ToString());
             }
         }
 
