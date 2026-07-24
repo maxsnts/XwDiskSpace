@@ -243,9 +243,6 @@ namespace XwDiskSpace
                     checkExclude.Checked = false;
                 }
 
-                if (!textExclude.Text.StartsWith("(?"))
-                    textExclude.Text = "(?i)" + textExclude.Text;
-
                 try
                 {
                     regexExclude = new Regex(textExclude.Text
