@@ -14,7 +14,7 @@ Once you identify which subfolder uses more space, you can then check that one.
 
 Sure, it will have to check the storage multiple times but at least it can be done with very little memory.
 
-![Connection Manager](Images/Main.jpg)
+![Connection Manager](Images/Main.png)
 
 ## In case you are feeling generous  
 [![PayPal donate button](https://www.paypalobjects.com/webstatic/en_US/btn/btn_donate_pp_142x27.png)](https://www.paypal.me/maxsnts)
