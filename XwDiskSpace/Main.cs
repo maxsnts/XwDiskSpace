@@ -5,6 +5,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -15,6 +16,7 @@ namespace XwDiskSpace
         private Dictionary<string, FolderInfo> FolderSizes = new Dictionary<string, FolderInfo>();
         private Stopwatch runTime = new Stopwatch();
         long totalFilesSoFar = 0;
+        long totalChildsSoFar = 0;
         long totalFoldersSoFar = 0;
         long totalSpaceSoFar = 0;
         long CurrentFolderSize = 0;
@@ -22,6 +24,10 @@ namespace XwDiskSpace
         DateTime CurrentFolderModified = DateTime.MinValue;
         StringBuilder Errors = new StringBuilder();
         string CurrentVersion = "";
+        private Regex regexInclude = null;
+        private Regex regexExclude = null;
+        private bool Running = false;
+        private bool Cancel = false;
 
         //****************************************************************************************************
         public Main()
@@ -82,6 +88,22 @@ namespace XwDiskSpace
 
             if (level == 1)
             {
+                if (checkInclude.Checked || checkExclude.Checked)
+                {
+                    string folderName = Path.GetFileName(path.TrimEnd(new char[] { '\\' }));
+                    if (checkInclude.Checked)
+                    {
+                        if (!regexInclude.IsMatch(folderName))
+                            return;
+                    }
+
+                    if (checkExclude.Checked)
+                    {
+                        if (regexExclude.IsMatch(folderName))
+                            return;
+                    }
+                }
+            
                 BeginInvoke((Action)(() =>
                 {
                     AddLog($"Entering '{path}'...", false);
@@ -121,6 +143,9 @@ namespace XwDiskSpace
                             AddLog(ex.Message, true, true);
                         }));
                     }
+
+                    if (Cancel)
+                        return;
                 }
             }
             catch (Exception ex)
@@ -146,6 +171,7 @@ namespace XwDiskSpace
                 {
                     AddLog($"=> {GetFileSize(finfo.Size)}");
                 }));
+                totalChildsSoFar++;
             }
         }
 
@@ -174,51 +200,108 @@ namespace XwDiskSpace
         //****************************************************************************************************
         private void buttonCalculate_Click(object sender, EventArgs e)
         {
+            if (Running)
+            {
+                AddLog("\r\n======== CANCELED =========", true, true);
+                Cancel = true;
+                return;
+            }
+
             if (!Directory.Exists(textStartPath.Text))
             {
                 MessageBox.Show("Path does not exists");
                 return;
             }
 
-            textStartPath.Enabled = false;
-            buttonBrowse.Enabled = false;
-            buttonCalculate.Enabled = false;
+            if (checkInclude.Checked)
+            {
+                textInclude.Text = textInclude.Text.Trim();
+                
+                if (textInclude.Text == string.Empty)
+                {
+                    checkInclude.Checked = false;
+                }
+
+                try
+                {
+                    regexInclude = new Regex(textInclude.Text
+                        , RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Compiled);
+                }
+                catch
+                {
+                    MessageBox.Show("Invalid include regex");
+                    return;
+                }
+            }
+
+            if (checkExclude.Checked)
+            {
+                textExclude.Text = textExclude.Text.Trim();
+                
+                if (textExclude.Text == string.Empty)
+                {
+                    checkExclude.Checked = false;
+                }
+
+                if (!textExclude.Text.StartsWith("(?"))
+                    textExclude.Text = "(?i)" + textExclude.Text;
+
+                try
+                {
+                    regexExclude = new Regex(textExclude.Text
+                        , RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Compiled);
+                }
+                catch
+                {
+                    MessageBox.Show("Invalid exclude regex");
+                    return;
+                }
+            }
+
             textBoxLog.Text = "";
             Errors.Clear();
             listViewResult.Items.Clear();
             FolderSizes.Clear();
             totalFilesSoFar = 0;
             totalFoldersSoFar = 0;
+            totalChildsSoFar = 0;
             totalSpaceSoFar = 0;
 
             AddLog("Running...");
             runTime.Start();
             timerTotal.Start();
-            timerGrid.Start(); ;
+            timerGrid.Start();
 
+            Cancel = false;
+            Running = true;
             Task.Run(() =>
             {
-                ProcessFolder(textStartPath.Text);
-                BeginInvoke((Action)(() =>
+                try
                 {
-                    runTime.Stop();
-                    if (totalFoldersSoFar > 0)
+                    ProcessFolder(textStartPath.Text);
+                    BeginInvoke((Action)(() =>
                     {
-                        AddLog(runTime.Elapsed.ToString());
-                        PrintTotals();
-                        UpdateTotals();
-                    }
-                    else
-                        AddLog("Path has no subfolders");
+                        runTime.Stop();
+                        if (totalFoldersSoFar > 0)
+                        {
+                            AddLog(runTime.Elapsed.ToString());
+                            PrintTotals();
+                            UpdateTotals();
+                        }
+                        else
+                            AddLog("Path has no subfolders");
 
-                    AddLog("========== DONE ===========");
-                    timerTotal.Stop();
-                    timerGrid.Stop();
-                    UpdateGrid();
-                    textStartPath.Enabled = true;
-                    buttonBrowse.Enabled = true;
-                    buttonCalculate.Enabled = true;
-                }));
+                        AddLog("========== DONE ===========");
+                        timerTotal.Stop();
+                        timerGrid.Stop();
+                        UpdateGrid();
+                        
+                    }));
+                }
+                finally
+                {
+                    Running = false;
+                }
             });
         }
 
@@ -245,6 +328,7 @@ namespace XwDiskSpace
         {
             labelCurrentFiles.Text = CurrentFolderFiles.ToString();
             labelCurrentSpace.Text = GetFileSize(CurrentFolderSize);
+            labelChilds.Text = totalChildsSoFar.ToString();
             labelTotalFolders.Text = totalFoldersSoFar.ToString();
             labelTotalFiles.Text = totalFilesSoFar.ToString();
             labelTotalSpace.Text = GetFileSize(totalSpaceSoFar);
@@ -345,6 +429,73 @@ namespace XwDiskSpace
             if (MessageBox.Show("Close window?", "Close...", 
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
                 e.Cancel = true;
+        }
+
+        //****************************************************************************************************
+        private void checkInclude_CheckedChanged(object sender, EventArgs e)
+        {
+            textInclude.Enabled = checkInclude.Checked;
+        }
+
+        //****************************************************************************************************
+        private void checkExclude_CheckedChanged(object sender, EventArgs e)
+        {
+            textExclude.Enabled = checkExclude.Checked;
+        }
+
+        //****************************************************************************************************
+        private void textInclude_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                Regex rgx = new Regex(textInclude.Text.Trim());
+                textInclude.ForeColor = Color.Black;
+            }
+            catch
+            {
+                textInclude.ForeColor = Color.Red;
+            }
+        }
+
+        //****************************************************************************************************
+        private void textExclude_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                Regex rgx = new Regex(textExclude.Text.Trim());
+                textExclude.ForeColor = Color.Black;
+            }
+            catch
+            {
+                textExclude.ForeColor = Color.Red;
+            }
+        }
+
+        //****************************************************************************************************
+        private void timerUI_Tick(object sender, EventArgs e)
+        {
+            if (Running)
+            {
+                buttonCalculate.Text = "Cancel";
+                textStartPath.Enabled = false;
+                buttonBrowse.Enabled = false;
+                checkInclude.Enabled = false;
+                checkExclude.Enabled = false;
+                textInclude.Enabled = false;
+                textExclude.Enabled = false;
+            }
+            else
+            {
+                buttonCalculate.Text = "Get childs space";
+                textStartPath.Enabled = true;
+                buttonBrowse.Enabled = true;
+                checkInclude.Enabled = true;
+                checkExclude.Enabled = true;
+                if (checkInclude.Checked)
+                    textInclude.Enabled = true;
+                if (checkExclude.Checked)
+                    textExclude.Enabled = true;
+            }
         }
     }
 }
